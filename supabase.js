@@ -29,25 +29,47 @@ async function loadStatus() {
 }
 
 loadStatus();   
-async function changeStatus(newStatus) {
+async function updateStatus(isOpen) {
+    const button = document.getElementById("statusButton");
 
-    const message = document.getElementById("message");
-    const currentStatus = document.getElementById("current-status");
+    button.textContent = "Updating...";
+    button.disabled = true;
 
-    message.textContent = "Updating...";
-
-    const { data, error } = await supabaseClient
+    const { error } = await supabase
         .from("settings")
-        .update({ status: newStatus })
-        .eq("id", 1)
-        .select();
+        .update({ is_open: isOpen })
+        .eq("id", 1);
 
     if (error) {
-        console.error(error);
-        message.textContent = "❌ " + error.message;
+        console.error("Supabase error:", error);
+        button.textContent = "Error";
+        button.disabled = false;
         return;
     }
 
-    currentStatus.textContent = data[0].status;
-    message.textContent = "✅ Updated!";
+    button.textContent = isOpen ? "OPEN" : "CLOSED";
+    button.disabled = false;
+
+    updatePublicStatus();
+}
+async function updateStatus(status) {
+    const button = document.getElementById("statusButton");
+
+    button.textContent = "Updating...";
+    button.disabled = true;
+
+    const { error } = await supabase
+        .from("settings")
+        .update({ status: status })
+        .eq("id", 1);
+
+    if (error) {
+        console.error("Supabase error:", error);
+        button.textContent = "Error";
+        button.disabled = false;
+        return;
+    }
+
+    button.textContent = status.toUpperCase();
+    button.disabled = false;
 }
